@@ -31,7 +31,7 @@ function randCoordinates(arr,gameMember){
    }
 }
 
-document.querySelector(".btn ").onclick = () => {
+document.querySelector(".btn ").onclick = ()=> {
   
   let x = getArray();
   randCoordinates(x,house)
