@@ -10,7 +10,6 @@ const house = img.house.name;
 const wolf = img.wolf.name;
 const ban = img.ban.name;
 
-
 const freebox = 0;
 function getArray() {
   const value = parseInt(document.getElementById("select").value);
@@ -19,19 +18,19 @@ function getArray() {
   return place;
 }
 
-function randCoordinates(arr) {
+function freeCoordinates(arr) {
   const x = Math.floor(Math.random() * arr.length);
   const y = Math.floor(Math.random() * arr.length);
 
   if (arr[x][y] === freebox) {
     return [x, y];
   } else {
-    return randCoordinates(arr);
+    return freeCoordinates(arr);
   }
 }
 
 function setCharacter(gameMember, arr) {
-  const [x, y] = randCoordinates(arr);
+  const [x, y] = freeCoordinates(arr);
   arr[x][y] = gameMember;
 }
 
@@ -50,15 +49,11 @@ function getMemberPosition(arr, gameMember) {
     });
     return accum;
   };
-  
-  let x = arr.reduce(findeposs, []);
-  // console.log(x[0]);
-  // console.log(x[0]=4);
-  return x
+
+  return arr.reduce(findeposs, []);
 }
 
-
-//drow 
+//drow
 
 document.querySelector(".btn ").onclick = () => {
   const matrix = getArray();
@@ -73,42 +68,48 @@ document.querySelector(".btn ").onclick = () => {
   memberCount(1, matrix, house);
   memberCount(wolves, matrix, wolf);
   memberCount(baners, matrix, ban);
-  
-  let currentPosition = getMemberPosition(matrix, rabbit);
-  // console.log(currentPosition)
-// console.log(currentPosition[0][0])
 
+  let rabbitCurrentPosition = getMemberPosition(matrix, rabbit);
   getMemberPosition(matrix, house);
   getMemberPosition(matrix, wolf);
   getMemberPosition(matrix, ban);
-  move(currentPosition)
+
+
   console.log(matrix);
+  move(rabbitCurrentPosition, matrix);
+  
+  
 };
 
-
-function move(currentPosition){
-  
-let x = currentPosition[0][0]
-let y = currentPosition[0][1]
-window.addEventListener('keydown', function(e) {
-  switch (e.keyCode) {
+function move(rabbitCurrentPosition, matrix) {
+  let x = rabbitCurrentPosition[0][0];
+  let y = rabbitCurrentPosition[0][1];
+  window.addEventListener("keydown", function (e) {
+    switch (e.keyCode) {
       case 37: //left
-          x -= 1;
-          break;
+        matrix[x][y] = 0;
+        matrix[x][y - 1] = "rabbit";
+        y -= 1;
+        console.log(matrix);
+        break;
       case 38: //up
-          y -= 1;
-          break;
+        matrix[x][y] = 0;
+        matrix[x - 1][y] = "rabbit";
+        x -= 1;
+        console.log(matrix);
+        break;
       case 39: //right
-          x += 1;
-          break;
-      case 40: //down 
-          y += 1;
-          break;
-  }
-});
-
+        matrix[x][y] = 0;
+        matrix[x][y + 1] = "rabbit";
+        y += 1;
+        console.log(matrix);
+        break;
+      case 40: //down
+        matrix[x][y] = 0;
+        matrix[x + 1][y] = "rabbit";
+        x += 1;
+        console.log(matrix);
+        break;
+    }
+  });
 }
-
-
-
-
