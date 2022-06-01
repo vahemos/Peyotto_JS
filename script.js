@@ -13,7 +13,9 @@ const ban = img.ban.name;
 const freebox = 0;
 function getArray() {
   const value = parseInt(document.getElementById("select").value);
-  const place = new Array(value).fill(freebox).map(() => new Array(value).fill(freebox));
+  const place = new Array(value)
+    .fill(freebox)
+    .map(() => new Array(value).fill(freebox));
 
   return place;
 }
@@ -53,6 +55,102 @@ function getMemberPosition(arr, gameMember) {
   return arr.reduce(findeposs, []);
 }
 
+function checkDoesKeyPressed(arr, herro) {
+  document.addEventListener("keydown", function (event) {
+    if (event.keyCode === 37) {
+      arrowLeft(arr, herro);
+    } //left
+    else if(event.keyCode === 38){
+      arrowUp(arr, herro);
+    }//up
+    else if(event.keyCode === 39){
+      arrowRight(arr, herro);
+
+    }//right
+    else if(event.keyCode === 40){
+      arrowDown(arr, herro);
+
+    }//down
+  });
+}
+
+//move left
+
+function arrowLeft(arr, herro) {
+  const [x, y] = getMemberPosition(arr, herro)[0];
+  let yAfterWalk = y - 1;
+  if (y === 0) {
+    yAfterWalk = 4;
+  }
+  if (arr[x][yAfterWalk] === freebox) {
+    arr[x][yAfterWalk] = herro;
+    arr[x][y] = freebox;
+    console.log(arr);
+  } else if (arr[x][yAfterWalk] === wolf) {
+    console.log("game over");
+  } else if (arr[x][yAfterWalk] === house) {
+    console.log("you won");
+  }
+}
+
+//move Up
+
+function arrowUp(arr, herro) {
+  const [x, y] = getMemberPosition(arr, herro)[0];
+  console.log(x,y)
+  let xAfterWalk = x - 1;
+  if (x === 0) {
+    xAfterWalk = 4;
+  }
+  if (arr[xAfterWalk][y] === freebox) {
+    arr[xAfterWalk][y] = herro;
+    arr[x][y] = freebox;
+    console.log(arr);
+  } else if (arr[xAfterWalk][y] === wolf) {
+    console.log("game over");
+  } else if (arr[xAfterWalk][y] === house) {
+    console.log("you won");
+  }
+}
+
+//move right
+
+function arrowRight(arr, herro) {
+  const [x, y] = getMemberPosition(arr, herro)[0];
+  let yAfterWalk = y + 1;
+  if (y === 4) {
+    yAfterWalk = 0;
+  }
+  if (arr[x][yAfterWalk] === freebox) {
+    arr[x][yAfterWalk] = herro;
+    arr[x][y] = freebox;
+    console.log(arr);
+  } else if (arr[x][yAfterWalk] === wolf) {
+    console.log("game over");
+  } else if (arr[x][yAfterWalk] === house) {
+    console.log("you won");
+  }
+}
+
+//move down
+
+function arrowDown(arr, herro) {
+  const [x, y] = getMemberPosition(arr, herro)[0];
+  console.log(x,y)
+  let xAfterWalk = x + 1;
+  if (x === 4) {
+    xAfterWalk = 0;
+  }
+  if (arr[xAfterWalk][y] === freebox) {
+    arr[xAfterWalk][y] = herro;
+    arr[x][y] = freebox;
+    console.log(arr);
+  } else if (arr[xAfterWalk][y] === wolf) {
+    console.log("game over");
+  } else if (arr[xAfterWalk][y] === house) {
+    console.log("you won");
+  }
+}
 //drow
 
 document.querySelector(".btn ").onclick = () => {
@@ -69,47 +167,12 @@ document.querySelector(".btn ").onclick = () => {
   memberCount(wolves, matrix, wolf);
   memberCount(baners, matrix, ban);
 
-  let rabbitCurrentPosition = getMemberPosition(matrix, rabbit);
+  getMemberPosition(matrix, rabbit);
   getMemberPosition(matrix, house);
   getMemberPosition(matrix, wolf);
   getMemberPosition(matrix, ban);
 
+  checkDoesKeyPressed(matrix, rabbit);
 
   console.log(matrix);
-  move(rabbitCurrentPosition, matrix);
-  
-  
 };
-
-function move(rabbitCurrentPosition, matrix) {
-  let x = rabbitCurrentPosition[0][0];
-  let y = rabbitCurrentPosition[0][1];
-  window.addEventListener("keydown", function (e) {
-    switch (e.keyCode) {
-      case 37: //left
-        matrix[x][y] = 0;
-        matrix[x][y - 1] = "rabbit";
-        y -= 1;
-        console.log(matrix);
-        break;
-      case 38: //up
-        matrix[x][y] = 0;
-        matrix[x - 1][y] = "rabbit";
-        x -= 1;
-        console.log(matrix);
-        break;
-      case 39: //right
-        matrix[x][y] = 0;
-        matrix[x][y + 1] = "rabbit";
-        y += 1;
-        console.log(matrix);
-        break;
-      case 40: //down
-        matrix[x][y] = 0;
-        matrix[x + 1][y] = "rabbit";
-        x += 1;
-        console.log(matrix);
-        break;
-    }
-  });
-}
