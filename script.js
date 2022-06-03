@@ -10,7 +10,7 @@ const house = img.house.name;
 const wolf = img.wolf.name;
 const ban = img.ban.name;
 
-const freebox = 0;
+const freebox = "0";
 function getArray() {
   const value = parseInt(document.getElementById("select").value);
   const place = new Array(value)
@@ -56,21 +56,24 @@ function getMemberPosition(arr, gameMember) {
 }
 
 function checkDoesKeyPressed(arr, herro) {
+  // freePossitionsAroundWolves(arr, wolf);
   document.addEventListener("keydown", function (event) {
     if (event.keyCode === 37) {
       arrowLeft(arr, herro);
+      // freePossitionsAroundWolves(arr, wolf);
     } //left
-    else if(event.keyCode === 38){
+    else if (event.keyCode === 38) {
       arrowUp(arr, herro);
-    }//up
-    else if(event.keyCode === 39){
+      // freePossitionsAroundWolves(arr, wolf);
+    } //up
+    else if (event.keyCode === 39) {
       arrowRight(arr, herro);
-
-    }//right
-    else if(event.keyCode === 40){
+      // freePossitionsAroundWolves(arr, wolf);
+    } //right
+    else if (event.keyCode === 40) {
       arrowDown(arr, herro);
-
-    }//down
+      // freePossitionsAroundWolves(arr, wolf);
+    } //down
   });
 }
 
@@ -97,7 +100,6 @@ function arrowLeft(arr, herro) {
 
 function arrowUp(arr, herro) {
   const [x, y] = getMemberPosition(arr, herro)[0];
-  console.log(x,y)
   let xAfterWalk = x - 1;
   if (x === 0) {
     xAfterWalk = 4;
@@ -136,7 +138,6 @@ function arrowRight(arr, herro) {
 
 function arrowDown(arr, herro) {
   const [x, y] = getMemberPosition(arr, herro)[0];
-  console.log(x,y)
   let xAfterWalk = x + 1;
   if (x === 4) {
     xAfterWalk = 0;
@@ -151,28 +152,74 @@ function arrowDown(arr, herro) {
     console.log("you won");
   }
 }
+
+function freePossitionsAroundWolves(arr, member) {
+  let massiv = [];
+  let wolvesCorrentPossition = getMemberPosition(arr, member);
+
+  wolvesCorrentPossition.forEach((wolfPossition) => {
+    const [x, y] = wolfPossition;
+
+    if (arr[x][y - 1] === freebox) {
+      massiv.push([x, y - 1]);
+    }
+    if (arr[x][y + 1] === freebox) {
+      massiv.push([x, y + 1]);
+    }
+    if (x !== 0) {
+      if (arr[x - 1][y] === freebox) {
+        massiv.push([x - 1, y]);
+      }
+    }
+    if (x !== 4) {
+      if (arr[x + 1][y] === freebox) {
+        massiv.push([x + 1, y]);
+      }
+    }
+    
+  });return massiv;
+  console.log(massiv, "wolves free possition massiv");
+}
+
+
+
 //drow
 
 document.querySelector(".btn ").onclick = () => {
+  
   const matrix = getArray();
-  const wolves = Math.ceil(
-    (60 * document.querySelector(".select").value) / 100
-  );
-  const baners = Math.ceil(
-    (40 * document.querySelector(".select").value) / 100
-  );
+  
+  const napoCount = 1;
+  const homeCount = 1;
+  const wolvesCount = Math.ceil((60 * document.querySelector(".select").value) / 100);
+  const banersCount = Math.ceil((40 * document.querySelector(".select").value) / 100);
 
-  memberCount(1, matrix, rabbit);
-  memberCount(1, matrix, house);
-  memberCount(wolves, matrix, wolf);
-  memberCount(baners, matrix, ban);
+  memberCount(napoCount, matrix, rabbit);
+  memberCount(homeCount, matrix, house);
+  memberCount(wolvesCount, matrix, wolf);
+  memberCount(banersCount, matrix, ban);
 
-  getMemberPosition(matrix, rabbit);
+  let rabbitPoss = getMemberPosition(matrix, rabbit);
   getMemberPosition(matrix, house);
   getMemberPosition(matrix, wolf);
+
   getMemberPosition(matrix, ban);
 
   checkDoesKeyPressed(matrix, rabbit);
 
+  let wolvesCanGo =freePossitionsAroundWolves(matrix, wolf)
+  distance(wolvesCanGo,rabbitPoss)
+
   console.log(matrix);
 };
+
+
+
+
+function distance(wolvesCanGo,rabbitPoss){
+
+  console.log (wolvesCanGo,"gilan")
+  console.log (rabbitPoss,"nap")
+
+
+}
