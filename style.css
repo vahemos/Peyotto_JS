@@ -58,3 +58,14 @@ background-size: cover;
     width: 60px;
     height: 60px;
   }
+
+  #game_over{
+    display: none;
+    width: 450px;
+    height: 450px;
+  }
+  #you_win{
+    display: none;
+    width: 450px;
+    height: 450px;
+  }
