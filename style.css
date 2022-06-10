@@ -54,7 +54,7 @@ background-size: cover;
     background-color: rgb(98, 236, 86);
   }
 
-  .game_zone>div>img{
+  img{
     width: 60px;
     height: 60px;
   }

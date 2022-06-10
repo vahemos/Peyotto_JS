@@ -4,48 +4,40 @@ const img = {
   ban: { name: "ban", src: "./img/ban.png", id: 3 },
   house: { name: "house", src: "./img/home.png", id: 4 },
 }
-
 const rabbit = img.rabbit.name
 const house = img.house.name
 const wolf = img.wolf.name
 const ban = img.ban.name
 const game_over = "game_over"
 const you_win = "you_win"
-
-
 const freebox = "0"
-
 function getArray() {
   const value = parseInt(document.getElementById("select").value)
   const place = new Array(value)
     .fill(freebox)
     .map(() => new Array(value).fill(freebox))
-
   return place
 }
-
 function freeCoordinates(arr) {
   const x = Math.floor(Math.random() * arr.length)
   const y = Math.floor(Math.random() * arr.length)
-
   if (arr[x][y] === freebox) {
     return [x, y]
   } else {
     return freeCoordinates(arr)
   }
 }
-
-function setCharacter(gameMember, arr) {
+function setMember(gameMember, gameState) {
+  const arr = gameState.gameZone
   const [x, y] = freeCoordinates(arr)
   arr[x][y] = gameMember
 }
-
-function memberCount(count, arr, gameMember) {
+function memberCount(count, gameState, gameMember) {
+  const arr = gameState.gameZone
   for (let i = 0; i < count; i++) {
-    setCharacter(gameMember, arr)
+    setMember(gameMember, gameState)
   }
 }
-
 function getMemberPosition(arr, gameMember) {
   const findeposs = function (accum, row, x) {
     row.forEach((item, y) => {
@@ -55,119 +47,86 @@ function getMemberPosition(arr, gameMember) {
     })
     return accum
   }
-
   return arr.reduce(findeposs, [])
 }
-
-function rabbitOrFreebox(matrix, emptyCellsArr) {
+function rabbitOrFreebox(gameState, emptyCellsArr) {
+  const arr = gameState.gameZone
   const massiv = []
-  emptyCellsArr.forEach((item) => {
-    const [x, y] = item
-    if (matrix[x][y] === rabbit && matrix[x][y] !== house) {
-    
-      clearGameZone()
-      show(game_over)  ///////////////////////////////////////////////////////////////////////////////
-      console.log("vahe")
-      
-      
+  emptyCellsArr.forEach((cell) => {
+    const [x, y] = cell
+    if (arr[x][y] === rabbit) {
+      gameState.isGameover = true
+
+      showMessage(game_over) ////////////////////           GAME OVER
+      console.log(gameState.isGameover)
     }
-    if (matrix[x][y] === freebox) {
+    if (arr[x][y] === freebox) {
       massiv.push([x, y])
     }
   })
   return massiv
 }
+// const gameState = {
+//   gameZone: matrix,
+//   isGameover: false,
+//   gameResult: null,
+// }
+////////////////////////////////////////////////////////////////////////////////
+function rabbitMove(gameState, rabbit, x, y) {
+  const arr = gameState.gameZone
+  console.log(gameState, "game state")
 
-
-//move left
-
-function arrowLeft(arr, herro) {
-  const [x, y] = getMemberPosition(arr, herro)[0]
-  let yAfterWalk = y - 1
-  if (y === 0) {
-    yAfterWalk = arr.length - 1
-  }
-  if (arr[x][yAfterWalk] === freebox) {
-    arr[x][yAfterWalk] = herro
-    arr[x][y] = freebox
-    console.log(arr)
-  } else if (arr[x][yAfterWalk] === wolf) {
-    clearGameZone()
-  
-  } else if (arr[x][yAfterWalk] === house) {
-    arr[x][y] = freebox
-    clearGameZone()
-    console.log("you won")
-    show(you_win)
+  const [i, j] = getMemberPosition(arr, rabbit)[0]
+  if (arr[x][y] === freebox) {
+    arr[x][y] = rabbit
+    arr[i][j] = freebox
+  } else if (arr[x][y] === wolf) {
+    // showMessage(game_over)                         ////     GAME OVER
+    //  del()
+    console.log("84")
+  } else if (arr[x][y] === house) {
+    // arr[x][y] === rabbit
+    arr[i][j] = freebox
+    showMessage(you_win) ////       YOU WIN
+    // del()
+    console.log("you win 89 ")
+  } else if (arr[x][y] === ban) {
+    return
   }
 }
-
-//move Up
-function arrowUp(arr, herro) {
-  const [x, y] = getMemberPosition(arr, herro)[0]
-  let xAfterWalk = x - 1
-  if (x === 0) {
-    xAfterWalk = arr.length - 1
-  }
-  if (arr[xAfterWalk][y] === freebox) {
-    arr[xAfterWalk][y] = herro
-    arr[x][y] = freebox
-    console.log(arr)
-  } else if (arr[xAfterWalk][y] === wolf) {
+function checkDoesKeyPressed(gameState, rabbit) {
+  const arr = gameState.gameZone
+  window.onkeydown = (event) => {
+    const [x, y] = getMemberPosition(arr, rabbit)[0]
+    let newX = x
+    let newY = y
+    if (event.key === "ArrowLeft") {
+      newY = y - 1
+      if (y === 0) {
+        newY = arr.length - 1
+      }
+    } else if (event.key === "ArrowUp") {
+      newX = x - 1
+      if (x === 0) {
+        newX = arr.length - 1
+      }
+    } else if (event.key === "ArrowRight") {
+      newY = y + 1
+      if (y === arr.length - 1) {
+        newY = 0
+      }
+    } else if (event.key === "ArrowDown") {
+      newX = x + 1
+      if (x === arr.length - 1) {
+        newX = 0
+      }
+    }
+    rabbitMove(gameState, rabbit, newX, newY)
+    freePossitionsAroundWolves(gameState, wolf)
     clearGameZone()
-  } else if (arr[xAfterWalk][y] === house) {
-    // arr[xAfterWalk][y] = rabbit
-    arr[x][y] = freebox
-    clearGameZone()
-    console.log("you won")
-    show(you_win)
-  }
-}
-
-//move right
-function arrowRight(arr, herro) {
-  const [x, y] = getMemberPosition(arr, herro)[0]
-  let yAfterWalk = y + 1
-  if (y === arr.length - 1) {
-    yAfterWalk = 0
-  }
-  if (arr[x][yAfterWalk] === freebox) {
-    arr[x][yAfterWalk] = herro
-    arr[x][y] = freebox
-    console.log(arr)
-  } else if (arr[x][yAfterWalk] === wolf) {
-    clearGameZone()
-  } else if (arr[x][yAfterWalk] === house) {
-    // arr[x][yAfterWalk] = rabbit
-    arr[x][y] = freebox
-    clearGameZone()
-    show(you_win)
+    createGameBoard(arr)
   }
 }
-
-//move down
-function arrowDown(arr, herro) {
-  const [x, y] = getMemberPosition(arr, herro)[0]
-  let xAfterWalk = x + 1
-  if (x === arr.length - 1) {
-    xAfterWalk = 0
-  }
-  if (arr[xAfterWalk][y] === freebox) {
-    arr[xAfterWalk][y] = herro
-    arr[x][y] = freebox
-    console.log(arr)
-  } else if (arr[xAfterWalk][y] === wolf) {
-    console.log("game over 145")
-    clearGameZone()
-  } else if (arr[xAfterWalk][y] === house) {
-    // arr[xAfterWalk][y] = rabbit
-    arr[x][y] = freebox
-    clearGameZone()
-    show(you_win)
-    
-  }
-}
-
 function getCordinat(arr, [x, y]) {
   const cells = [
     [x - 1, y],
@@ -175,30 +134,29 @@ function getCordinat(arr, [x, y]) {
     [x, y - 1],
     [x, y + 1],
   ]
-  const result = cells.filter((item) => checkIsEmpty(arr, item))
-  return result
+  return cells.filter((cell) => isInRange(arr, cell))
 }
-
-function checkIsEmpty(arr, [x, y]) {
+function isInRange(arr, [x, y]) {
   return x >= 0 && x < arr.length && y >= 0 && y < arr.length
 }
-
-function freePossitionsAroundWolves(arr, member) {
+function freePossitionsAroundWolves(gameState, member) {
+  const arr = gameState.gameZone
   let wolvesCorrentPossition = getMemberPosition(arr, member)
-
-  wolvesCorrentPossition.forEach((item) => {
-    const cells = getCordinat(arr, item)
-    const freeCells = rabbitOrFreebox(arr, cells)
-    const distanceArray = getClosestCell(freeCells, arr)
-    const closestCell = getMinDistance(distanceArray, freeCells)
-    moaveSingleWolfToNewPosition(closestCell, item, arr)
+  wolvesCorrentPossition.forEach((wolf) => {
+    if (gameState.isGameover === true) {
+      console.log("fsyo")
+      return
+    } else {
+      const cells = getCordinat(arr, wolf)
+      const freeCells = rabbitOrFreebox(gameState, cells)
+      const distanceArray = getClosestCell(freeCells, arr)
+      const closestCell = getMinDistance(distanceArray, freeCells)
+      moaveSingleWolfToNewPosition(closestCell, wolf, arr)
+    }
   })
 }
-
-
 function getClosestCell(freeBoxes, arr) {
   const rabbitCords = getMemberPosition(arr, rabbit)
-
   const distaceArray = []
   freeBoxes.forEach((cord) => {
     const distanceSingle = distance(cord, rabbitCords[0])
@@ -206,61 +164,32 @@ function getClosestCell(freeBoxes, arr) {
   })
   return distaceArray
 }
-
 function getMinDistance(distaceArray, freeBoxes) {
   const min = Math.min(...distaceArray)
   const index = distaceArray.indexOf(min)
   return freeBoxes[index]
 }
-
 function distance(wolf, rabbit) {
   const [x, y] = wolf
   const [z, k] = rabbit
-
   return Math.round(Math.sqrt(Math.pow(x - z, 2) + Math.pow(y - k, 2)))
 }
-
-function moaveSingleWolfToNewPosition([x, y], [z, k], array) {
-  array[x][y] = wolf
-  array[z][k] = freebox
+function moaveSingleWolfToNewPosition([x, y], [z, k], arr) {
+  arr[x][y] = wolf
+  arr[z][k] = freebox
 }
-
-function checkDoesKeyPressed(arr, herro) {
-  document.addEventListener("keydown", function (event) {
-    if (event.keyCode === 37) {
-      arrowLeft(arr, herro)
-      freePossitionsAroundWolves(arr, wolf)
-      clearGameZone()
-      createGameBoard(arr)
-    } //left
-    else if (event.keyCode === 38) {
-      arrowUp(arr, herro)
-      freePossitionsAroundWolves(arr, wolf)
-      clearGameZone()
-      createGameBoard(arr)
-    } //up
-    else if (event.keyCode === 39) {
-      arrowRight(arr, herro)
-      freePossitionsAroundWolves(arr, wolf)
-      clearGameZone()
-      createGameBoard(arr)
-    } //right
-    else if (event.keyCode === 40) {
-      arrowDown(arr, herro)
-      freePossitionsAroundWolves(arr, wolf)
-      clearGameZone()
-      createGameBoard(arr)
-    } //down
-  })
-}
-
 //drow
-document.querySelector(".btn ").onclick = () => {
+document.querySelector(".startbutton").onclick = () => {
+  drow()
   const selectValue = parseInt(document.getElementById("select").value)
   gameZoneSize(selectValue)
   const matrix = getArray()
-
-  const napoCount = 1
+  const gameState = {
+    gameZone: matrix,
+    isGameover: false,
+    gameResult: null,
+  }
+  const rabbitCount = 1
   const homeCount = 1
   const wolvesCount = Math.ceil(
     (60 * document.querySelector(".select").value) / 100
@@ -268,46 +197,34 @@ document.querySelector(".btn ").onclick = () => {
   const banersCount = Math.ceil(
     (40 * document.querySelector(".select").value) / 100
   )
-
-  memberCount(napoCount, matrix, rabbit)
-  memberCount(homeCount, matrix, house)
-  memberCount(wolvesCount, matrix, wolf)
-  memberCount(banersCount, matrix, ban)
-
-  getMemberPosition(matrix, rabbit)
-  getMemberPosition(matrix, house)
-  getMemberPosition(matrix, wolf)
-  getMemberPosition(matrix, ban)
-
+  memberCount(rabbitCount, gameState, rabbit)
+  memberCount(homeCount, gameState, house)
+  memberCount(wolvesCount, gameState, wolf)
+  memberCount(banersCount, gameState, ban)
   clearGameZone()
-  createGameBoard(matrix)
-
-  checkDoesKeyPressed(matrix, rabbit)
+  createGameBoard(gameState.gameZone)
+  checkDoesKeyPressed(gameState, rabbit)
   hide(you_win)
   hide(game_over)
-
-  console.log(matrix, "matrix")
+  console.log(gameState.gameZone, "matrix")
 }
-
 function gameZoneSize(selectValue) {
   const gameZone = document.getElementById("game_zone")
   const gameZoneSize = selectValue * 60 + 20 + "px"
   gameZone.style.width = gameZoneSize
 }
-
 function createInnerDivs(id) {
   const mainDiv = document.getElementById("game_zone")
   const innerDiv = document.createElement("div")
   innerDiv.setAttribute("id", id)
   mainDiv.append(innerDiv)
 }
-function createImg(id, character) {
+function createImg(id, member) {
   const mainDiv = document.getElementById(id)
   const innerImg = document.createElement("img")
-  innerImg.setAttribute("src", character)
+  innerImg.setAttribute("src", member)
   mainDiv.append(innerImg)
 }
-
 function createGameBoard(matrix) {
   matrix.forEach((row, rowIndex) => {
     row.forEach((column, columnIndex) => {
@@ -338,11 +255,20 @@ function clearGameZone() {
   const mainDiv = document.getElementById("game_zone")
   mainDiv.innerHTML = ""
 }
-
-function show(id){
-const x = document.getElementById(id)
-x.style.display="block"}
-function hide(id){
+function showMessage(id) {
   const x = document.getElementById(id)
-x.style.display="none"
+  x.style.display = "block"
+  del()
+}
+function hide(id) {
+  const x = document.getElementById(id)
+  x.style.display = "none"
+}
+function del() {
+  const x = document.getElementById("game_zone")
+  x.style.display = "none"
+}
+function drow() {
+  let x = document.getElementById("game_zone")
+  x.style.display = "flex"
 }
