@@ -11,13 +11,69 @@ const ban = img.ban.name
 const game_over = "game_over"
 const you_win = "you_win"
 const freebox = "0"
-function getArray() {
-  const value = parseInt(document.getElementById("select").value)
-  const place = new Array(value)
-    .fill(freebox)
-    .map(() => new Array(value).fill(freebox))
-  return place
+let boardNum = 0
+
+function tamplate(gameNum) {
+  return `<div class="start" id = "${"startButton" + gameNum}">
+  <button class="startbutton" id="${"startbutton" + gameNum}">START</button>
+  <select name="" id="${"select" + gameNum}" class="select">
+    <option value="5">5 x 5</option>
+    <option value="7">7 x 7</option>
+    <option value="10">10 x 10</option>
+  </select>
+</div>
+<div id="${"over" + gameNum}">
+  <img
+    src="./img/game-over-escape-rooms.jpg"
+    alt="game over"
+    class="game_over"
+    id="${"game_over" + gameNum}"/>
+</div>
+<div id="${"win" + gameNum}"> 
+  <img
+    src="./img/you-win-sign-pop-art-style_175838-498.jpeg"
+    alt="you win"
+    class="you_win"
+    id="${"you_win" + gameNum}"/>
+</div>
+<div id="${"game_zone" + gameNum}"  class="game_zone"></div>
+<div class="up">
+  <button id="${"up" + gameNum}" class ="up" >UP</button>
+</div>
+<div class="leftRight">
+  <button id="${"left" + gameNum}" class ="left">Left</button>
+  <button id="${"right" + gameNum}" class ="right">Right</button>
+</div>
+<div class="down"><button id="${"down" + gameNum}" class="down">Down</button></div>`
 }
+
+function newBoard() {
+  const wrapper = document.querySelector(".wrapper")
+  const tamp = tamplate(boardNum)
+  const newDiv = document.createElement("div")
+  newDiv.id = "newDiv" + boardNum
+  newDiv.setAttribute("class", "newDiv")
+  newDiv.innerHTML = tamp
+  wrapper.append(newDiv)
+}
+
+function eventListener(num) {
+  const startX = document.getElementById("startbutton" + num)
+  startX.addEventListener("click", () => start(num))
+}
+
+function creatBoard() {
+  boardNum++
+  newBoard()
+  eventListener(boardNum)
+}
+
+document.getElementById("createNewBoard").addEventListener("click", creatBoard)
+
+function getArray(boardSize) {
+  return new Array(boardSize).fill(freebox).map(() => new Array(boardSize).fill(freebox))
+}
+
 function freeCoordinates(arr) {
   const x = Math.floor(Math.random() * arr.length)
   const y = Math.floor(Math.random() * arr.length)
@@ -33,7 +89,7 @@ function setMember(gameMember, gameState) {
   arr[x][y] = gameMember
 }
 function memberCount(count, gameState, gameMember) {
-  const arr = gameState.gameZone
+  // const arr = gameState.gameZone
   for (let i = 0; i < count; i++) {
     setMember(gameMember, gameState)
   }
@@ -56,9 +112,7 @@ function rabbitOrFreebox(gameState, emptyCellsArr) {
     const [x, y] = cell
     if (arr[x][y] === rabbit) {
       gameState.isGameover = true
-
-      showMessage(game_over) ////////////////////           GAME OVER
-      console.log(gameState.isGameover)
+      showMessage(gameState, game_over) ////////////////////           GAME OVER
     }
     if (arr[x][y] === freebox) {
       massiv.push([x, y])
@@ -66,65 +120,84 @@ function rabbitOrFreebox(gameState, emptyCellsArr) {
   })
   return massiv
 }
-// const gameState = {
-//   gameZone: matrix,
-//   isGameover: false,
-//   gameResult: null,
-// }
-////////////////////////////////////////////////////////////////////////////////
 function rabbitMove(gameState, rabbit, x, y) {
   const arr = gameState.gameZone
-  console.log(gameState, "game state")
-
   const [i, j] = getMemberPosition(arr, rabbit)[0]
-  if (arr[x][y] === freebox) {
-    arr[x][y] = rabbit
-    arr[i][j] = freebox
-  } else if (arr[x][y] === wolf) {
-    // showMessage(game_over)                         ////     GAME OVER
-    //  del()
-    console.log("84")
-  } else if (arr[x][y] === house) {
-    // arr[x][y] === rabbit
-    arr[i][j] = freebox
-    showMessage(you_win) ////       YOU WIN
-    // del()
-    console.log("you win 89 ")
-  } else if (arr[x][y] === ban) {
-    return
+  if (gameState.isGameover === false) {
+    if (arr[x][y] === freebox) {
+      arr[x][y] = rabbit
+      arr[i][j] = freebox
+    } else if (arr[x][y] === wolf) {
+      gameState.gameResult = game_over
+      ////     GAME OVER
+    } else if (arr[x][y] === ban) {
+      return
+    } else if (arr[x][y] === house) {
+      gameState.gameResult = you_win
+      showMessage(gameState, gameState.gameResult) ////       YOU WIN
+      gameState.isGameover = true
+      return
+    }
   }
 }
 function checkDoesKeyPressed(gameState, rabbit) {
   const arr = gameState.gameZone
-  window.onkeydown = (event) => {
+  const left = document.getElementById("left" + gameState.boardNum)
+  const up = document.getElementById("up" + gameState.boardNum)
+  const right = document.getElementById("right" + gameState.boardNum)
+  const down = document.getElementById("down" + gameState.boardNum)
+  const [x, y] = getMemberPosition(arr, rabbit)[0]
+  left.onclick = () => {
     const [x, y] = getMemberPosition(arr, rabbit)[0]
     let newX = x
     let newY = y
-    if (event.key === "ArrowLeft") {
-      newY = y - 1
-      if (y === 0) {
-        newY = arr.length - 1
-      }
-    } else if (event.key === "ArrowUp") {
-      newX = x - 1
-      if (x === 0) {
-        newX = arr.length - 1
-      }
-    } else if (event.key === "ArrowRight") {
-      newY = y + 1
-      if (y === arr.length - 1) {
-        newY = 0
-      }
-    } else if (event.key === "ArrowDown") {
-      newX = x + 1
-      if (x === arr.length - 1) {
-        newX = 0
-      }
+    newY = y - 1
+    if (y === 0) {
+    newY = arr.length - 1
     }
     rabbitMove(gameState, rabbit, newX, newY)
     freePossitionsAroundWolves(gameState, wolf)
-    clearGameZone()
-    createGameBoard(arr)
+    clearGameZone(gameState)
+    createGameBoard(gameState)
+  }
+  up.onclick = () => {
+    const [x, y] = getMemberPosition(arr, rabbit)[0]
+    let newX = x
+    let newY = y
+    newX = x - 1
+    if (x === 0) {
+      newX = arr.length - 1
+    }
+    rabbitMove(gameState, rabbit, newX, newY)
+    freePossitionsAroundWolves(gameState, wolf)
+    clearGameZone(gameState)
+    createGameBoard(gameState)
+  }
+  right.onclick = () => {
+    const [x, y] = getMemberPosition(arr, rabbit)[0]
+    let newX = x
+    let newY = y
+    newY = y + 1
+    if (y === arr.length - 1) {
+      newY = 0
+    }
+    rabbitMove(gameState, rabbit, newX, newY)
+    freePossitionsAroundWolves(gameState, wolf)
+    clearGameZone(gameState)
+    createGameBoard(gameState)
+  }
+  down.onclick = () => {
+    const [x, y] = getMemberPosition(arr, rabbit)[0]
+    let newX = x
+    let newY = y
+    newX = x + 1
+    if (x === arr.length - 1) {
+      newX = 0
+    }
+    rabbitMove(gameState, rabbit, newX, newY)
+    freePossitionsAroundWolves(gameState, wolf)
+    clearGameZone(gameState)
+    createGameBoard(gameState)
   }
 }
 function getCordinat(arr, [x, y]) {
@@ -139,14 +212,14 @@ function getCordinat(arr, [x, y]) {
 function isInRange(arr, [x, y]) {
   return x >= 0 && x < arr.length && y >= 0 && y < arr.length
 }
+
 function freePossitionsAroundWolves(gameState, member) {
   const arr = gameState.gameZone
   let wolvesCorrentPossition = getMemberPosition(arr, member)
   wolvesCorrentPossition.forEach((wolf) => {
     if (gameState.isGameover === true) {
-      console.log("fsyo")
       return
-    } else {
+    }  else{
       const cells = getCordinat(arr, wolf)
       const freeCells = rabbitOrFreebox(gameState, cells)
       const distanceArray = getClosestCell(freeCells, arr)
@@ -179,16 +252,20 @@ function moaveSingleWolfToNewPosition([x, y], [z, k], arr) {
   arr[z][k] = freebox
 }
 //drow
-document.querySelector(".startbutton").onclick = () => {
-  drow()
-  const selectValue = parseInt(document.getElementById("select").value)
-  gameZoneSize(selectValue)
-  const matrix = getArray()
+function start(boardNum) {
+ 
+  const value = parseInt(document.getElementById("select" + boardNum).value)
+  const matrix = getArray(value)
   const gameState = {
     gameZone: matrix,
     isGameover: false,
     gameResult: null,
+    boardNum: boardNum,
   }
+   
+  drow(gameState)
+  
+  gameZoneSize(gameState, value)
   const rabbitCount = 1
   const homeCount = 1
   const wolvesCount = Math.ceil(
@@ -201,74 +278,79 @@ document.querySelector(".startbutton").onclick = () => {
   memberCount(homeCount, gameState, house)
   memberCount(wolvesCount, gameState, wolf)
   memberCount(banersCount, gameState, ban)
-  clearGameZone()
-  createGameBoard(gameState.gameZone)
-  checkDoesKeyPressed(gameState, rabbit)
-  hide(you_win)
-  hide(game_over)
+  clearGameZone(gameState)
+  createGameBoard(gameState)
+  checkDoesKeyPressed(gameState, rabbit) 
+  hide(gameState, you_win)
+  hide(gameState, game_over)
   console.log(gameState.gameZone, "matrix")
 }
-function gameZoneSize(selectValue) {
-  const gameZone = document.getElementById("game_zone")
+function gameZoneSize(gameState, selectValue) {
+  const gameZone = document.getElementById("game_zone" + gameState.boardNum)
   const gameZoneSize = selectValue * 60 + 20 + "px"
   gameZone.style.width = gameZoneSize
 }
-function createInnerDivs(id) {
-  const mainDiv = document.getElementById("game_zone")
+function createInnerDivs(gameState, id) {
+  const mainDiv = document.getElementById("game_zone" + gameState.boardNum)
+
   const innerDiv = document.createElement("div")
-  innerDiv.setAttribute("id", id)
+
+  innerDiv.id = id + gameState.boardNum
+
   mainDiv.append(innerDiv)
 }
-function createImg(id, member) {
-  const mainDiv = document.getElementById(id)
+function createImg(gameState, id, member) {
+  const mainDiv = document.getElementById(id + gameState.boardNum)
   const innerImg = document.createElement("img")
   innerImg.setAttribute("src", member)
+  
   mainDiv.append(innerImg)
 }
-function createGameBoard(matrix) {
+function createGameBoard(gameState) {
+  const matrix = gameState.gameZone
   matrix.forEach((row, rowIndex) => {
     row.forEach((column, columnIndex) => {
       const id = rowIndex.toString() + columnIndex.toString()
       if (column === freebox) {
-        createInnerDivs(id)
+        createInnerDivs(gameState, id)
       }
       if (column === wolf) {
-        createInnerDivs(id)
-        createImg(id, img.wolf.src)
+        createInnerDivs(gameState, id)
+        createImg(gameState, id, img.wolf.src)
       }
       if (column === ban) {
-        createInnerDivs(id)
-        createImg(id, img.ban.src)
+        createInnerDivs(gameState, id)
+        createImg(gameState, id, img.ban.src)
       }
       if (column === house) {
-        createInnerDivs(id)
-        createImg(id, img.house.src)
+        createInnerDivs(gameState, id)
+        createImg(gameState, id, img.house.src)
       }
       if (column === rabbit) {
-        createInnerDivs(id)
-        createImg(id, img.rabbit.src)
+        createInnerDivs(gameState, id)
+        createImg(gameState, id, img.rabbit.src)
       }
     })
   })
 }
-function clearGameZone() {
-  const mainDiv = document.getElementById("game_zone")
+function clearGameZone(gameState) {
+  const mainDiv = document.getElementById("game_zone" + gameState.boardNum)
   mainDiv.innerHTML = ""
 }
-function showMessage(id) {
-  const x = document.getElementById(id)
+function showMessage(gameState, id) {
+  const x = document.getElementById(id + gameState.boardNum)
   x.style.display = "block"
-  del()
+  del(gameState)
 }
-function hide(id) {
-  const x = document.getElementById(id)
+function hide(gameState, id) {
+  const x = document.getElementById(`${id}${gameState.boardNum}`) 
   x.style.display = "none"
 }
-function del() {
-  const x = document.getElementById("game_zone")
+function del(gameState) {
+  const x = document.getElementById("game_zone" + gameState.boardNum)
   x.style.display = "none"
 }
-function drow() {
-  let x = document.getElementById("game_zone")
+function drow(gameState) {
+  let x = document.getElementById("game_zone" + gameState.boardNum)
   x.style.display = "flex"
 }

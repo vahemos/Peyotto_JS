@@ -59,13 +59,23 @@ background-size: cover;
     height: 60px;
   }
 
-  #game_over{
+  .game_over{
     display: none;
-    width: 450px;
-    height: 450px;
+    width: 300px;
+    height: 300px;
   }
-  #you_win{
+  .you_win{
     display: none;
-    width: 450px;
-    height: 450px;
+    width: 300px;
+    height: 300px;
   }
+.up{  
+ text-align: center;
+}
+.down{  
+  text-align: center;
+  margin-bottom: 80px;
+ }
+ .leftRight{
+text-align: center;
+ }
