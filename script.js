@@ -12,6 +12,9 @@ const game_over = "game_over"
 const you_win = "you_win"
 const freebox = "0"
 let boardNum = 0
+const intervalObj = {}
+
+
 
 function tamplate(gameNum) {
   return `<div class="start" id = "${"startButton" + gameNum}">
@@ -160,7 +163,7 @@ function checkDoesKeyPressed(gameState, rabbit) {
 
   function gameOneStep(x, y) {
     rabbitMove(gameState, rabbit, x, y)
-    freePossitionsAroundWolves(gameState, wolf)
+    // freePossitionsAroundWolves(gameState, wolf)
     clearGameZone(gameState)
     createGameBoard(gameState)
   }
@@ -231,7 +234,7 @@ function freePossitionsAroundWolves(gameState, member) {
       const wolfNextStep = atacRabbit(gameState, cells)
       const distanceArray = getClosestCell(wolfNextStep, matrix)
       const closestCell = getMinDistance(distanceArray, wolfNextStep)
-      moaveSingleWolfToNewPosition(closestCell, wolf, gameState)
+      moveSingleWolfToNewPosition(closestCell, wolf, gameState)
     }
   })
 }
@@ -254,7 +257,7 @@ function distance(wolf, rabbit) {
   const [z, k] = rabbit
   return Math.round(Math.sqrt(Math.pow(x - z, 2) + Math.pow(y - k, 2)))
 }
-function moaveSingleWolfToNewPosition([x, y], [z, k], gameState) {
+function moveSingleWolfToNewPosition([x, y], [z, k], gameState) {
   const matrix = gameState.gameZone
   if (matrix[x][y] === rabbit) {
     gameState.isGameover = true
@@ -263,8 +266,21 @@ function moaveSingleWolfToNewPosition([x, y], [z, k], gameState) {
   matrix[z][k] = freebox
 }
 
+
+function addGameStateInIntervalObj(gameState){
+  intervalObj[gameState.boardNum] = gameState 
+}
+
+function delInterval(boardNum){
+  if( intervalObj[boardNum]){
+    clearInterval(intervalObj[boardNum].wolfMoveInterval)
+  }
+}
+
+
 //drow
-function start(boardNum) {
+function start(boardNum) {   
+  delInterval(boardNum)    
   const gameBoardSize = parseInt(
     document.getElementById("select" + boardNum).value
   )
@@ -274,10 +290,16 @@ function start(boardNum) {
     isGameover: false,
     gameResult: null,
     boardNum: boardNum,
-  }
+    wolfMoveInterval: setInterval(() => {
+      freePossitionsAroundWolves(gameState, wolf)
+      clearGameZone(gameState)
+      createGameBoard(gameState)      
+    }, 1500)
+  } 
+  addGameStateInIntervalObj(gameState)
 
-  drowBorder(gameState)
-
+  drowBoard(gameState)
+  
   gameZoneSize(gameState, gameBoardSize)
   const rabbitCount = 1
   const homeCount = 1
@@ -296,7 +318,7 @@ function start(boardNum) {
 }
 function gameZoneSize(gameState, selectValue) {
   const gameZone = document.getElementById("game_zone" + gameState.boardNum)
-  const gameZoneSize = selectValue * 60 + 20 + "px"
+  const gameZoneSize = selectValue * 61 + 20 + "px"
   gameZone.style.width = gameZoneSize
 }
 
@@ -369,7 +391,7 @@ function hideBoard(gameState) {
   hideElementById("game_zone" + gameState.boardNum)
 }
 
-function drowBorder(gameState) {
+function drowBoard(gameState) {
   const getBorder = document.getElementById("game_zone" + gameState.boardNum)
   if (getBorder) {
     getBorder.style.display = "flex"
